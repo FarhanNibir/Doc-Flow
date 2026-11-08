@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}DocFlow{% endblock %}</title>
+<style>
+ body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;background:#f3f6fb;color:#17263b}
+ header{background:#111f36;color:#fff;padding:14px 4%;display:flex;justify-content:space-between;align-items:center}
+ header a{color:#b5c7e4;text-decoration:none;margin-left:14px}
+ main{max-width:1000px;margin:24px auto;padding:0 16px}
+ .card{background:#fff;border:1px solid #dce5f0;border-radius:12px;padding:18px;margin-bottom:16px}
+ table{width:100%;border-collapse:collapse;font-size:14px} td,th{padding:8px;border-bottom:1px solid #e6edf5;text-align:left}
+ label{display:block;font-size:12px;font-weight:700;color:#586b82;margin:12px 0 4px}
+ input,textarea,select{width:100%;padding:9px;border:1px solid #cdd8e7;border-radius:8px;font:inherit;box-sizing:border-box}
+ button,.btn{background:#176bd2;color:#fff;border:0;padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}
+ button.sec{background:#edf3fb;color:#25496d} button.warn{background:#b3261e}
+ .pill{font-size:12px;background:#eaf3ff;color:#176bd2;border-radius:20px;padding:3px 10px}
+ .msg{padding:10px 14px;border-radius:8px;margin-bottom:10px;background:#e8f3ff} .msg.error{background:#fde8e8} .msg.warning{background:#fff3d6}
+ .flag{color:#a35312;font-size:13px} .log{font-size:12px;line-height:1.7;max-height:220px;overflow:auto;background:#f7f9fc;padding:10px;border-radius:8px}
+ .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+</style></head><body>
+<header><b>◈ DocFlow</b>
+<form method="post" action="{% url 'role' %}" style="display:flex;gap:8px;align-items:center;margin:0">{% csrf_token %}
+ <input type="hidden" name="next" value="{{ request.path }}">
+ <span style="font-size:12px;color:#b5c7e4">Acting as</span>
+ <select name="role" onchange="this.form.submit()" style="width:auto;padding:5px">
+  <option value="client" {% if request.session.role|default:"client" == "client" %}selected{% endif %}>Client</option>
+  <option value="staff" {% if request.session.role == "staff" %}selected{% endif %}>Staff</option>
+  <option value="reviewer" {% if request.session.role == "reviewer" %}selected{% endif %}>Reviewer</option>
+ </select>
+ <a href="/">Requests</a><a href="/admin/">Admin</a>
+</form></header>
+<main>
+{% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+{% block content %}{% endblock %}
+</main></body></html>

@@ -1,0 +1,49 @@
+{% extends "docs/base.html" %}
+{% block content %}
+<div class="card">
+ <div class="row" style="justify-content:space-between">
+  <h2 style="margin:0">{{ dr.ref }} <span class="pill">{{ dr.state }}</span></h2>
+  <a class="btn sec" href="{% url 'pdf' dr.ref %}" target="_blank" style="background:#edf3fb;color:#25496d">Open PDF {% if dr.final_pdf %}(final){% else %}(draft preview){% endif %}</a>
+ </div>
+ {% if v %}<p style="font-size:13px;color:#586b82">Version {{ v.number }} · template {{ dr.template }} · content hash <code>{{ v.hash|slice:":12" }}</code>
+ {% if v.approved_by %}· approved by <b>{{ v.approved_by }}</b>{% endif %}</p>{% endif %}
+ {% if dr.final_sha256 %}<p style="font-size:13px">Final PDF SHA-256: <code>{{ dr.final_sha256 }}</code></p>{% endif %}
+</div>
+
+{% if v %}
+{% if v.flags %}<div class="card"><b>Flags for human review</b>{% for f in v.flags %}<div class="flag">⚠ {{ f }}</div>{% endfor %}</div>{% endif %}
+
+<div class="card"><h3 style="margin-top:0">Content</h3>
+{% for s, text in secs %}
+ <div style="border-bottom:1px solid #edf1f5;padding:10px 0">
+  <b>{{ s.title }}</b> <span class="pill">{{ s.mode }}</span>
+  <p>{{ text }}</p>
+  {% if staffer and s.mode == "ai" and dr.state != "SIGNED" and dr.state != "FINALIZED" and dr.state != "DELIVERED" and dr.state != "REJECTED" %}
+  <details><summary>Edit / regenerate</summary>
+   <form method="post" action="{% url 'action' dr.ref 'edit' %}">{% csrf_token %}
+    <input type="hidden" name="section_id" value="{{ s.id }}"><textarea name="text" rows="4">{{ text }}</textarea>
+    <p class="row"><button>Save as new version</button></p></form>
+   <form method="post" action="{% url 'action' dr.ref 'regen' %}">{% csrf_token %}
+    <input type="hidden" name="section_id" value="{{ s.id }}"><button class="sec">Regenerate this section with AI</button></form>
+  </details>{% endif %}
+ </div>
+{% endfor %}</div>
+{% endif %}
+
+<div class="card"><h3 style="margin-top:0">Actions</h3><div class="row">
+ {% if staffer and dr.state == "INTERNAL_QA" %}
+  <form method="post" action="{% url 'action' dr.ref 'qa' %}">{% csrf_token %}<button>Pass internal QA → send to reviewer</button></form>{% endif %}
+ {% if reviewer and dr.state == "REVIEW_PENDING" %}
+  <form method="post" action="{% url 'action' dr.ref 'approve' %}">{% csrf_token %}<button>✓ Approve</button></form>
+  <form method="post" action="{% url 'action' dr.ref 'changes' %}">{% csrf_token %}<input name="comment" placeholder="What must change?" style="width:260px"><button class="sec">↩ Request changes</button></form>
+  <form method="post" action="{% url 'action' dr.ref 'reject' %}">{% csrf_token %}<input name="comment" placeholder="Reason" style="width:200px"><button class="warn">Reject</button></form>{% endif %}
+ {% if reviewer and is_approver and dr.state == "SIGNING_PENDING" %}
+  <form method="post" action="{% url 'action' dr.ref 'sign' %}">{% csrf_token %}<button>✍ Apply signature &amp; seal</button></form>{% endif %}
+ {% if staffer and dr.state == "FINALIZED" %}
+  <form method="post" action="{% url 'action' dr.ref 'deliver' %}">{% csrf_token %}<button>Deliver to client</button></form>{% endif %}
+</div>
+<p style="font-size:12px;color:#65778c">Signature and seal are demo graphics. A real deployment needs reviewer authentication, explicit consent, protected signature storage and legal review.</p></div>
+
+<div class="card"><h3 style="margin-top:0">Audit trail {% if audit_ok %}<span class="pill">chain intact</span>{% else %}<span class="pill" style="background:#fde8e8;color:#b3261e">TAMPERED</span>{% endif %}</h3>
+<div class="log">{% for e in audit %}<div>• {{ e.ts }} — <b>{{ e.actor }}</b> · {{ e.action }} {{ e.detail }}</div>{% endfor %}</div></div>
+{% endblock %}

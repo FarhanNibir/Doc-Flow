@@ -1,0 +1,12 @@
+{% extends "docs/base.html" %}{% load docs_extras %}
+{% block content %}
+<div class="card"><h2 style="margin-top:0">{{ t.name }}</h2>
+{% if problems %}<div class="msg error">{% for p in problems %}{{ p }}<br>{% endfor %}</div>{% endif %}
+<form method="post">{% csrf_token %}
+{% for f in t.fields %}
+ <label>{{ f.label }}{% if f.required %} *{% endif %}</label>
+ {% if f.type == "textarea" %}<textarea name="{{ f.name }}" rows="4">{{ data|get:f.name }}</textarea>
+ {% else %}<input name="{{ f.name }}" type="{{ f.type }}" value="{{ data|get:f.name }}">{% endif %}
+{% endfor %}
+<p><button>Generate draft</button></p></form></div>
+{% endblock %}

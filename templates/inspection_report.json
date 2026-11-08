@@ -1,0 +1,38 @@
+{
+  "id": "inspection_report",
+  "version": 1,
+  "name": "Equipment Inspection Report",
+  "page": {"size": "A4", "margin_mm": 15},
+  "font_name": "Helvetica",
+  "font_size": 10,
+  "line_height": 1.45,
+  "fields": [
+    {"name": "organization", "label": "Organization / Site", "type": "text", "required": true},
+    {"name": "asset", "label": "Equipment / Asset", "type": "text", "required": true},
+    {"name": "inspection_date", "label": "Inspection Date", "type": "date", "required": true},
+    {"name": "inspector", "label": "Inspector", "type": "text", "required": true},
+    {"name": "findings", "label": "Observed Findings", "type": "textarea", "required": true},
+    {"name": "recommended_action", "label": "Recommended Action", "type": "textarea", "required": true}
+  ],
+  "zones": [
+    {"id": "header",    "x": 15, "y": 12,  "w": 180, "h": 22,  "kind": "header"},
+    {"id": "body",      "x": 15, "y": 40,  "w": 180, "h": 170, "kind": "text"},
+    {"id": "signature", "x": 15, "y": 228, "w": 80,  "h": 28,  "kind": "signature"},
+    {"id": "seal",      "x": 125,"y": 220, "w": 45,  "h": 40,  "kind": "seal"},
+    {"id": "footer",    "x": 15, "y": 280, "w": 180, "h": 8,   "kind": "footer"}
+  ],
+  "sections": [
+    {"id": "identification", "title": "1. Identification", "zone": "body", "mode": "copy",
+     "input_fields": ["organization", "asset", "inspection_date", "inspector"],
+     "instruction": "Copy verified identifiers exactly. Never invent values.", "max_words": 60},
+    {"id": "summary", "title": "2. Inspection Summary", "zone": "body", "mode": "ai",
+     "input_fields": ["asset", "organization", "inspection_date"],
+     "instruction": "Neutral professional summary. Add no unsupported facts.", "max_words": 80},
+    {"id": "observations", "title": "3. Recorded Observations", "zone": "body", "mode": "ai",
+     "input_fields": ["findings"],
+     "instruction": "Use only the provided findings. Flag missing data.", "max_words": 250},
+    {"id": "recommendations", "title": "4. Recommended Follow-up", "zone": "body", "mode": "ai",
+     "input_fields": ["recommended_action"],
+     "instruction": "Short actionable recommendations, labeled as proposals. Do not invent technical claims.", "max_words": 150}
+  ]
+}

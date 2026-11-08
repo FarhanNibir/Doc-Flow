@@ -1,0 +1,6 @@
+out/
+web/db.sqlite3
+web/private_pdfs/
+__pycache__/
+.pytest_cache/
+*.pyc
